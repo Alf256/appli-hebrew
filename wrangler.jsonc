@@ -1,0 +1,8 @@
+{
+  "name": "appli-hebrew",
+  "compatibility_date": "2026-10-01",
+  // Adresse gratuite en .workers.dev
+  "workers_dev": true,
+  // Site statique : tout le contenu de l'app est dans public/
+  "assets": { "directory": "./public" }
+}

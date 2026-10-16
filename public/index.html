@@ -1,0 +1,523 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Shalom !</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#1f5fbf">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-title" content="Shalom">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Atkinson+Hyperlegible:wght@400;700&family=JetBrains+Mono:wght@500;700&family=Noto+Sans+Hebrew:wght@500;700&display=swap">
+<style>
+/* Layout : une colonne façon app mobile, écran d'accueil (parcours) puis écran de leçon plein écran */
+:root{
+  --bg:#eaf1fb; --surface:rgba(255,255,255,.62); --ink:#14233d; --muted:#5a6b87;
+  --accent:#1f5fbf; --accent-ink:#ffffff; --spark:#c27c0e; --line:rgba(60,110,190,.18);
+  --glow1:rgba(80,140,255,.32); --glow2:rgba(120,210,255,.25); --chip:rgba(255,255,255,.5);
+  --ok:#1f8a4c; --ko:#c9372c; --ok-bg:#e2f4e8; --ko-bg:#fbe5e2;
+  --me:#1f5fbf; --me-ink:#ffffff; --them:rgba(80,130,220,.12);
+  --f-he:"Noto Sans Hebrew","Arial Hebrew",system-ui,sans-serif;
+  --f-display:"Bricolage Grotesque",ui-rounded,system-ui,sans-serif;
+  --f-body:"Atkinson Hyperlegible",system-ui,sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0d1626; --surface:rgba(26,40,66,.6); --ink:#eaf1fc; --muted:#a6b6cf;
+  --accent:#6ea8ff; --accent-ink:#0b1424; --spark:#f2b84b; --line:rgba(150,190,255,.16);
+  --glow1:rgba(60,110,255,.32); --glow2:rgba(60,180,230,.18); --chip:rgba(255,255,255,.06);
+  --ok:#4fd18e; --ko:#ff7b7b; --ok-bg:#163a2a; --ko-bg:#3d1c22;
+  --me:#6ea8ff; --me-ink:#0b1424; --them:rgba(120,170,255,.14); color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0d1626; --surface:rgba(26,40,66,.6); --ink:#eaf1fc; --muted:#a6b6cf;
+  --accent:#6ea8ff; --accent-ink:#0b1424; --spark:#f2b84b; --line:rgba(150,190,255,.16);
+  --glow1:rgba(60,110,255,.32); --glow2:rgba(60,180,230,.18); --chip:rgba(255,255,255,.06);
+  --ok:#4fd18e; --ko:#ff7b7b; --ok-bg:#163a2a; --ko-bg:#3d1c22;
+  --me:#6ea8ff; --me-ink:#0b1424; --them:rgba(120,170,255,.14); color-scheme:dark}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 var(--f-body);min-height:100vh}
+/* Fond bleu : deux halos de couleur fixes derrière tout le contenu */
+body::after{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;background:radial-gradient(60% 45% at 15% 10%,var(--glow1),transparent 70%),radial-gradient(55% 40% at 90% 85%,var(--glow2),transparent 70%),radial-gradient(40% 35% at 85% 20%,var(--glow1),transparent 70%)}
+.card,.mod,.bits,.speed{-webkit-backdrop-filter:blur(14px) saturate(140%);backdrop-filter:blur(14px) saturate(140%)}
+.wrap{max-width:560px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 40px;display:flex;flex-direction:column;gap:20px}
+h1,h2,h3{font-family:var(--f-display);text-wrap:balance;margin:0;line-height:1.15}
+h1{font-size:2rem;font-weight:800;letter-spacing:-.01em}
+h2{font-size:1.45rem;font-weight:800}
+h3{font-size:1.1rem;font-weight:600}
+p{margin:0}
+button{-webkit-tap-highlight-color:transparent}
+.eyebrow{font:700 .72rem/1 var(--f-mono);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.top{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.chips{display:flex;gap:8px;align-items:center}
+.bits{font:700 .9rem var(--f-mono);color:var(--spark);background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:6px 12px;white-space:nowrap;font-variant-numeric:tabular-nums}
+.speed{font:700 .8rem var(--f-body);color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:6px 10px;cursor:pointer;white-space:nowrap}
+.speed[aria-pressed="true"]{background:var(--spark);border-color:var(--spark);color:#fff}
+.hero{display:flex;flex-direction:column;gap:8px}
+.hero p{color:var(--muted)}
+.mod{display:grid;grid-template-columns:auto 1fr auto;gap:14px;align-items:center;width:100%;text-align:left;background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:16px;padding:14px 16px;cursor:pointer;font:inherit}
+.mod:hover{border-color:var(--accent)}
+.mod:focus-visible,button:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.code{font-size:1.6rem;width:52px;height:52px;border-radius:12px;display:grid;place-items:center;background:var(--chip);border:1px solid var(--line)}
+.mod.done .code{border-color:var(--ok);background:var(--ok-bg)}
+.mod .meta{min-width:0;display:flex;flex-direction:column;gap:2px}
+.mod .meta small{color:var(--muted)}
+.state{font:700 .75rem var(--f-mono);color:var(--muted)}
+.mod.done .state{color:var(--ok)}
+.btn{font:700 1rem var(--f-body);border:0;border-radius:14px;padding:14px 18px;background:var(--accent);color:var(--accent-ink);cursor:pointer;width:100%}
+.btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
+.back{background:none;border:0;color:var(--accent);font:700 .95rem var(--f-body);cursor:pointer;padding:6px 0}
+.progress{height:8px;background:var(--line);border-radius:99px;overflow:hidden}
+.progress i{display:block;height:100%;background:var(--accent);transition:width .3s}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:20px;display:flex;flex-direction:column;gap:14px}
+.card p{max-width:62ch}
+.choices{display:flex;flex-direction:column;gap:10px}
+.choice{font:inherit;text-align:left;padding:12px 14px;border-radius:12px;border:1px solid var(--line);background:var(--chip);color:var(--ink);cursor:pointer}
+.choice.ok{background:var(--ok-bg);border-color:var(--ok)}
+.choice.ko{background:var(--ko-bg);border-color:var(--ko)}
+.fb{font-weight:700}
+.fb.ok{color:var(--ok)} .fb.ko{color:var(--ko)}
+.foot{color:var(--muted);font-size:.85rem;text-align:center}
+.hint{font-size:.88rem;color:var(--muted)}
+.row2{display:flex;gap:10px}
+.row2 .btn{flex:1}
+/* Mot hébreu qu'on peut toucher pour l'entendre */
+.say{font:700 1em var(--f-body);color:var(--accent);background:none;border:0;padding:0;cursor:pointer;text-decoration:underline dotted;text-underline-offset:3px}
+.say{text-decoration:none}
+/* Cartes de vocabulaire */
+.words{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.word{font:inherit;color:var(--ink);background:var(--chip);border:1px solid var(--line);border-radius:14px;padding:12px 8px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px;text-align:center}
+.word .em{font-size:2.2rem;line-height:1.2}
+.word b{font-size:1.05rem}
+.word small{color:var(--muted)}
+.word.playing{border-color:var(--accent)}
+/* Liste de phrases */
+.rows{display:flex;flex-direction:column;gap:8px}
+.rowp{font:inherit;color:var(--ink);text-align:left;background:var(--chip);border:1px solid var(--line);border-radius:12px;padding:10px 12px;cursor:pointer;display:grid;grid-template-columns:auto 1fr;gap:2px 10px;align-items:center}
+.rowp .ic{grid-row:span 2;font-size:1.1rem}
+.rowp b{font-size:1.02rem}
+.rowp small{color:var(--muted)}
+.rowp.playing{border-color:var(--accent)}
+/* Écoute */
+.listen{display:flex;gap:10px}
+.big{font:700 1.05rem var(--f-body);flex:1;border-radius:14px;padding:18px;border:0;background:var(--spark);color:#fff;cursor:pointer}
+.big.slow{flex:0 0 auto;background:var(--chip);color:var(--ink);border:1px solid var(--line)}
+/* Phrase à reconstruire */
+.built{display:flex;flex-wrap:wrap;gap:6px;min-height:56px;border:1px dashed var(--line);border-radius:12px;padding:10px;align-content:flex-start}
+.built .ph{color:var(--muted);font-size:.9rem}
+.tiles{display:flex;flex-wrap:wrap;gap:8px}
+.tile{font:700 1rem var(--f-body);border:1px solid var(--line);border-bottom-width:3px;background:var(--chip);color:var(--ink);border-radius:10px;padding:8px 12px;cursor:pointer}
+.built .tile{background:var(--surface)}
+.fr{font-style:italic;color:var(--muted)}
+/* Dialogue */
+.chat{display:flex;flex-direction:column;gap:10px}
+.msg{max-width:85%;padding:10px 14px;border-radius:18px;display:flex;flex-direction:column;gap:4px}
+.msg .who{font:700 .7rem var(--f-mono);letter-spacing:.08em;text-transform:uppercase;opacity:.75}
+.msg.them{align-self:flex-start;background:var(--them);border-bottom-left-radius:6px}
+.msg.me{align-self:flex-end;background:var(--me);color:var(--me-ink);border-bottom-right-radius:6px}
+.msg .line{font:inherit;color:inherit;background:none;border:0;padding:0;text-align:left;cursor:pointer;font-size:1.02rem}
+.msg .line::after{content:" 🔊";font-size:.8em}
+.msg .trb{font:700 .78rem var(--f-body);color:var(--accent);background:none;border:0;padding:0;cursor:pointer;align-self:flex-start}
+.msg .tr{font-size:.88rem;color:var(--muted);font-style:italic}
+.typing{align-self:flex-start;color:var(--muted);font-size:.9rem}
+/* Petit tableau de grammaire */
+.gram{display:flex;flex-direction:column;border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.gram button{font:inherit;color:var(--ink);background:var(--chip);border:0;border-top:1px solid var(--line);display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:9px 12px;text-align:left;cursor:pointer}
+.gram button:first-child{border-top:0}
+.gram button b .lat::after{content:" 🔊";font-style:normal}
+.gram button span{color:var(--muted)}
+.note{background:var(--chip);border-left:4px solid var(--spark);border-radius:8px;padding:10px 12px;font-size:.95rem}
+.lex h3{margin:6px 0 2px}
+.level{gap:10px;padding:14px 16px}
+.lv-top{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center}
+.lv-em{font-size:2rem}
+.lv-meta{display:flex;flex-direction:column;gap:4px;min-width:0}
+.lv-meta b{font:800 1.2rem var(--f-display)}
+.lv-next{font-size:.8rem;color:var(--muted);text-align:right}
+.lvup{font-weight:700;color:var(--spark)}
+/* Effets au toucher : le bouton s'enfonce, une onde part du doigt */
+.btn,.mod,.choice,.word,.rowp,.tile,.big,.gram button,.speed,.back{transition:transform .12s ease,box-shadow .2s ease,border-color .2s ease,background-color .2s ease}
+.btn:active,.mod:active,.choice:active,.word:active,.rowp:active,.tile:active,.big:active,.gram button:active,.speed:active{transform:scale(.97)}
+.fx-host{position:relative;overflow:hidden;isolation:isolate}
+.ripple{position:absolute;border-radius:50%;pointer-events:none;background:var(--glow1);transform:scale(0);animation:ripple .55s ease-out forwards;z-index:-1}
+@keyframes ripple{to{transform:scale(1);opacity:0}}
+.choice.ok,.word.playing,.rowp.playing{animation:pop .35s ease}
+.choice.ko{animation:shake .35s ease}
+@keyframes pop{40%{transform:scale(1.04)}100%{transform:scale(1)}}
+@keyframes shake{20%,60%{transform:translateX(-5px)}40%,80%{transform:translateX(5px)}}
+.msg{animation:rise .3s ease both}
+@keyframes rise{from{opacity:.2;transform:translateY(8px)}to{opacity:1;transform:none}}
+/* Hébreu : écrit de droite à gauche, police avec les voyelles (nikoud), transcription en dessous */
+.he{font-family:var(--f-he);direction:rtl;unicode-bidi:isolate;font-size:1.25em;line-height:1.5}
+.lat{display:block;font-size:.82em;color:var(--muted);font-style:italic}
+.say .he{font-size:1.15em}
+.say .lat{display:inline;font-size:.9em;color:inherit;opacity:.8}
+.say::after{content:" 🔊"}
+.word .em.letter{font-family:var(--f-he);font-size:2.6rem;color:var(--accent)}
+.word .he,.rowp .he{font-size:1.3rem}
+.rowp b{display:block}
+.choice .he{font-size:1.2rem;display:block;text-align:right}
+.choice .lat{text-align:right}
+.choice.big-he{font-family:var(--f-he);font-size:1.8rem;text-align:center}
+.msg .line .he{display:block;font-size:1.2rem;text-align:right}
+.msg.me .lat{color:inherit;opacity:.85}
+.msg .line::after{content:""}
+.msg .line .lat::after{content:" 🔊";font-style:normal}
+.gram button b{font-weight:600}
+.gram button b .he{display:block}
+.built,.tiles{direction:rtl}
+.tile .he{display:block;font-size:1.15rem}
+.tile .lat{font-size:.72rem}
+.qhe{font-family:var(--f-he);font-size:1.6em}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap" id="app"></div>
+
+<script src="audio/map.js"></script>
+<script>
+// "hébreu|transcription" -> [hébreu, transcription]
+const sp = x => { const i = x.indexOf("|"); return i < 0 ? [x, ""] : [x.slice(0,i), x.slice(i+1)] };
+const escH = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c]));
+// Bloc hébreu + transcription en dessous
+const HE = x => { const [h,t] = sp(x); return `<span class="he" lang="he" dir="rtl">${escH(h)}</span>${t ? `<span class="lat">${escH(t)}</span>` : ""}` };
+// Mot hébreu cliquable dans un texte : on le touche pour l'entendre
+// Met en forme les mots hébreux d'un texte simple (sans balises) pour que le sens de lecture reste bon
+const wrapHe = s => s.includes("<") ? s : s.replace(/[\u0590-\u05FF]+(?:\s+[\u0590-\u05FF]+)*/g, m => `<span class="he" lang="he" dir="rtl">${m}</span>`);
+const E = x => { const [h,t] = sp(x); return `<button class="say" data-say="${escH(t)}"><span class="he" lang="he" dir="rtl">${escH(h)}</span> <span class="lat">(${escH(t)})</span></button>` };
+</script>
+<script src="lessons.js"></script>
+<script>
+const MODULES = window.MODULES;
+// Personnes à voix d'homme dans les dialogues
+const MALE = new Set(window.MALE);
+
+const store = {
+  get(){ let s; try{ s = Object.assign({done:{}, pts:0, slow:false}, JSON.parse(localStorage.getItem("shalom-hebreu"))) }catch(e){ s = {done:{}, pts:0, slow:false} } if(s.xp === undefined) s.xp = s.pts; return s },
+  set(s){ try{ localStorage.setItem("shalom-hebreu", JSON.stringify(s)) }catch(e){} }
+};
+let S = store.get();
+
+// ---- Niveaux : calculés sur le total des points gagnés (xp), qui ne baisse jamais, même après un achat ----
+const scored = st => !["lesson","words","phrases"].includes(st.t);
+const MAXPTS = MODULES.reduce((n,m) => n + m.steps.filter(scored).length * 10, 0);
+const LEVELS = [[0,"🌱","Débutant"],[.16,"🙂","Curieux"],[.32,"🧭","Explorateur"],[.5,"💬","Bavard"],[.7,"😎","Confiant"],[.9,"🏆","Expert"]]
+  .map(([r,em,name]) => ({xp: Math.round(MAXPTS*r/10)*10, em, name}));
+const levelOf = xp => { let i = 0; while(i+1 < LEVELS.length && xp >= LEVELS[i+1].xp) i++; return i };
+function levelCard(){
+  const i = levelOf(S.xp), L = LEVELS[i], N = LEVELS[i+1];
+  const pct = N ? (S.xp - L.xp) / (N.xp - L.xp) * 100 : 100;
+  return `<div class="level card"><div class="lv-top"><span class="lv-em" aria-hidden="true">${L.em}</span>
+    <span class="lv-meta"><span class="eyebrow">Niveau ${i+1}</span><b>${L.name}</b></span>
+    <span class="lv-next">${N ? `encore ${N.xp - S.xp} pts<br>avant ${N.name}` : "Niveau max !"}</span></div>
+    <div class="progress"><i style="width:${pct}%"></i></div></div>`;
+}
+const app = document.getElementById("app");
+const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c]));
+const shuffle = a => { a = [...a]; for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]] } return a };
+
+// ---- Voix hébraïques enregistrées (fichiers audio dans audio/, liste dans audio/map.js, la clé est la transcription) ----
+// Deux voix : "m" (homme, par défaut, choisie par Alf) et "f" (femme), pour les filles des dialogues.
+const AUDIO_MAP = window.AUDIO || {};
+const player = new Audio();
+player.preload = "auto";
+let queueList = [];
+function playNext(){
+  const item = queueList.shift();
+  if(!item) return;
+  player.src = item.src;
+  player.playbackRate = item.slow ? 0.65 : (S.slow ? 0.8 : 1);
+  player.preservesPitch = true;
+  player.play().catch(() => { queueList = [] });
+}
+player.addEventListener("ended", playNext);
+// queue=true : attend la fin de la phrase en cours au lieu de la couper
+function say(text, {slow=false, queue=false, voice="m"} = {}){
+  const file = AUDIO_MAP[voice + "|" + text] || AUDIO_MAP["m|" + text];
+  if(!file){ console.warn("Audio manquant :", text); return }
+  const item = {src: "audio/" + file, slow};
+  if(queue && !player.paused && !player.ended){ queueList.push(item); return }
+  queueList = [item]; player.pause(); playNext();
+}
+const TTS = Object.keys(AUDIO_MAP).length > 0;
+// Tout élément avec data-say parle quand on le touche
+document.addEventListener("click", e => {
+  const el = e.target.closest("[data-say]");
+  if(!el) return;
+  say(el.dataset.say, {voice: el.dataset.voice || "m"});
+  if(el.classList.contains("word") || el.classList.contains("rowp")){
+    app.querySelectorAll(".playing").forEach(x => x.classList.remove("playing")); el.classList.add("playing");
+  }
+});
+
+// Onde violette à l'endroit touché
+const FX = ".btn,.mod,.choice,.word,.rowp,.tile,.big,.gram button,.speed";
+document.addEventListener("pointerdown", e => {
+  const el = e.target.closest(FX);
+  if(!el || el.disabled || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  const r = el.getBoundingClientRect(), d = Math.max(r.width, r.height) * 2.2;
+  el.classList.add("fx-host");
+  const w = document.createElement("span");
+  w.className = "ripple";
+  w.style.cssText = `width:${d}px;height:${d}px;left:${e.clientX - r.left - d/2}px;top:${e.clientY - r.top - d/2}px`;
+  el.appendChild(w);
+  setTimeout(() => w.remove(), 600);
+});
+
+const speedBtn = () => `<button class="speed" id="speed" aria-pressed="${S.slow}">🐢 ${S.slow ? "Lent" : "Normal"}</button>`;
+function bindSpeed(){
+  const b = app.querySelector("#speed");
+  if(b) b.onclick = () => { S.slow = !S.slow; store.set(S); b.setAttribute("aria-pressed", S.slow); b.textContent = "🐢 " + (S.slow ? "Lent" : "Normal") };
+}
+
+function home(){
+  const doneCount = MODULES.filter(m => S.done[m.id] !== undefined).length;
+  app.innerHTML = `
+    <div class="top"><span class="eyebrow">Shalom !</span><span class="chips">${speedBtn()}<span class="bits">${S.pts} pts</span></span></div>
+    <div class="hero"><h1>Parler hébreu, une conversation à la fois.</h1>
+      <p>On commence par les lettres, puis des mots à écouter, des phrases utiles, un quiz et une vraie petite conversation à chaque leçon. ${doneCount}/${MODULES.length} leçons terminées.</p></div>
+    ${levelCard()}
+    ${MODULES.map((m,i) => { const done = S.done[m.id] !== undefined;
+      return `<button class="mod ${done?"done":""}" data-i="${i}">
+        <span class="code" aria-hidden="true">${m.em}</span>
+        <span class="meta"><h3>${i}. ${m.title}</h3><small>${m.sub}</small></span>
+        <span class="state">${done?"✓ fait":"go"}</span></button>` }).join("")}
+    <button class="btn ghost" id="lex">📒 Mon lexique : tous les mots</button>
+    <p class="foot">${TTS ? "Si tu n'entends rien, monte le volume et vérifie que le mode silencieux est désactivé." : "Les enregistrements audio n'ont pas pu être chargés."} Ta progression reste sur ce téléphone.</p>`;
+  app.querySelectorAll(".mod").forEach(b => b.onclick = () => lesson(+b.dataset.i, 0, 0));
+  app.querySelector("#lex").onclick = lexicon;
+  bindSpeed();
+  window.scrollTo(0,0);
+}
+
+function lexicon(){
+  app.innerHTML = `<div class="top"><button class="back" id="back">← Parcours</button>${speedBtn()}</div>
+    <h1>Mon lexique</h1><p class="hint">Touche un mot pour l'entendre.</p>
+    ${MODULES.map(m => `<div class="lex card"><h3>${m.em} ${m.title}</h3><div class="rows">
+      ${m.steps.filter(s => s.t==="words").flatMap(s => s.items).map(([em,x,fr]) => `<button class="rowp" data-say="${esc(sp(x)[1])}"><span class="ic">${em}</span><b>${HE(x)}</b><small>${esc(fr)}</small></button>`).join("")}
+      ${m.steps.filter(s => s.t==="phrases").flatMap(s => s.items).map(([x,fr]) => `<button class="rowp" data-say="${esc(sp(x)[1])}"><span class="ic">💬</span><b>${HE(x)}</b><small>${esc(fr)}</small></button>`).join("")}
+    </div></div>`).join("")}`;
+  app.querySelector("#back").onclick = home;
+  bindSpeed();
+  window.scrollTo(0,0);
+}
+
+function lesson(mi, si, score){
+  const m = MODULES[mi], st = m.steps[si], total = m.steps.length;
+  if(!st) return finish(mi, score);
+  const head = `<div class="top"><button class="back" id="back">← Parcours</button><span class="chips">${speedBtn()}<span class="bits">${S.pts} pts</span></span></div>
+    <div class="progress"><i style="width:${si/total*100}%"></i></div>
+    <span class="eyebrow">${m.title} · étape ${si+1}/${total}</span>`;
+  const next = s => lesson(mi, si+1, s);
+  const fb = (ok, msg) => { const el = app.querySelector("#fb"); el.hidden = false; el.className = "fb "+(ok?"ok":"ko"); el.innerHTML = msg };
+  const showGo = (gain) => { const go = app.querySelector("#go"); go.hidden = false; go.onclick = () => next(score + gain); go.scrollIntoView({behavior:"smooth", block:"nearest"}) };
+
+  if(st.t === "lesson"){
+    app.innerHTML = head + `<div class="card"><h2>${st.h}</h2>${st.p.map(x => `<p>${wrapHe(x)}</p>`).join("")}
+      ${st.gram ? `<div class="gram">${st.gram.map(([x,fr]) => `<button data-say="${esc(sp(x)[1])}"><b>${HE(x)}</b><span>${esc(fr)}</span></button>`).join("")}</div>` : ""}
+      ${st.note ? `<p class="note">${wrapHe(st.note)}</p>` : ""}</div>
+      <button class="btn" id="go">Continuer</button>`;
+    app.querySelector("#go").onclick = () => next(score);
+
+  } else if(st.t === "words"){
+    app.innerHTML = head + `<div class="card"><h2>${st.h}</h2><p class="hint">${st.letters ? "Touche chaque lettre pour entendre son nom. En dessous : le son qu'elle fait." : "Touche chaque carte pour entendre le mot."}</p>
+      <div class="words">${st.items.map(([em,x,fr]) => `<button class="word" data-say="${esc(sp(x)[1])}"><span class="em${st.letters ? " letter" : ""}" ${st.letters ? 'lang="he"' : 'aria-hidden="true"'}>${em}</span><b>${HE(x)}</b><small>${esc(fr)}</small></button>`).join("")}</div></div>
+      <button class="btn" id="go">Continuer</button>`;
+    app.querySelector("#go").onclick = () => next(score);
+
+  } else if(st.t === "phrases"){
+    app.innerHTML = head + `<div class="card"><h2>${st.h}</h2><p class="hint">Touche une phrase pour l'entendre, puis répète-la à voix haute.</p>
+      <div class="rows">${st.items.map(([x,fr]) => `<button class="rowp" data-say="${esc(sp(x)[1])}"><span class="ic" aria-hidden="true">🔊</span><b>${HE(x)}</b><small>${esc(fr)}</small></button>`).join("")}</div></div>
+      <button class="btn" id="go">Continuer</button>`;
+    app.querySelector("#go").onclick = () => next(score);
+
+  } else if(st.t === "listen" || st.t === "quiz"){
+    const listen = st.t === "listen";
+    app.innerHTML = head + `<div class="card">
+      ${listen ? `<span class="eyebrow">Écoute</span><h2>Qu'est-ce que ça veut dire ?</h2>
+        <div class="listen"><button class="big" id="play">🔊 Écouter</button><button class="big slow" id="playslow" aria-label="Écouter lentement">🐢</button></div>` : `<h2>${esc(st.q).replace(/([\u0590-\u05FF]+)/g, '<span class="qhe" lang="he">$1</span>')}</h2>`}
+      <div class="choices">${st.c.map((c,i) => st.he ? `<button class="choice" data-i="${i}">${HE(c)}</button>`
+        : /[\u0590-\u05FF]/.test(c) ? `<button class="choice big-he" lang="he" data-i="${i}">${esc(c)}</button>` : `<button class="choice" data-i="${i}">${esc(c)}</button>`).join("")}</div>
+      <p class="fb" id="fb" hidden></p></div><button class="btn" id="go" hidden>Continuer</button>`;
+    if(listen){
+      const key = sp(st.say)[1];
+      app.querySelector("#play").onclick = () => say(key);
+      app.querySelector("#playslow").onclick = () => say(key, {slow:true});
+      say(key);
+    }
+    let answered = false;
+    app.querySelectorAll(".choice").forEach(b => b.onclick = () => {
+      if(answered) return; answered = true;
+      const i = +b.dataset.i, good = i === st.a;
+      b.classList.add(good ? "ok" : "ko"); app.querySelectorAll(".choice")[st.a].classList.add("ok");
+      if(listen) fb(good, (good ? "Exact ! " : "Pas tout à fait. ") + `Tu as entendu : ${E(st.say)}`);
+      else { fb(good, (good ? "Exact ! " : "Pas tout à fait. ") + esc(st.why)); if(st.he) say(sp(st.c[st.a])[1]) }
+      showGo(good ? 1 : 0);
+    });
+
+  } else if(st.t === "build"){
+    const [h, t] = sp(st.he), hw = h.split(" "), tw = t.split(" ");
+    const words = hw.map((w,i) => w + "|" + (tw[i] || ""));
+    const tiles = shuffle([...words, ...(st.extra||[])].map((w,i) => ({w, i})));
+    let picked = [], tries = 0, solved = false;
+    app.innerHTML = head + `<div class="card"><span class="eyebrow">Construis la phrase en hébreu</span><h2>« ${esc(st.fr)} »</h2>
+      <div class="built" id="built"></div>
+      <div class="tiles" id="tiles"></div>
+      <p class="hint">Touche les mots dans l'ordre. En hébreu, la phrase se construit de droite à gauche. Attention, certains mots sont en trop !</p>
+      <p class="fb" id="fb" hidden></p></div>
+      <div class="row2" id="act"><button class="btn ghost" id="clear">Effacer</button><button class="btn" id="check">Valider</button></div>
+      <button class="btn" id="go" hidden>Continuer</button>`;
+    // Glissement : on note où était chaque étiquette, on redessine, puis on la fait glisser de l'ancienne place à la nouvelle
+    const slide = (change) => {
+      const before = {};
+      app.querySelectorAll(".tile").forEach(t => before[t.dataset.i] = t.getBoundingClientRect());
+      change();
+      if(matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+      app.querySelectorAll(".tile").forEach(t => {
+        const b = before[t.dataset.i]; if(!b) return;
+        const a = t.getBoundingClientRect(), dx = b.left - a.left, dy = b.top - a.top;
+        if(!dx && !dy) return;
+        t.animate([{transform:`translate(${dx}px,${dy}px)`}, {transform:"none"}], {duration:320, easing:"cubic-bezier(.2,.8,.2,1)"});
+      });
+    };
+    const render = () => {
+      app.querySelector("#built").innerHTML = picked.length ? picked.map(t => `<button class="tile" data-i="${t.i}">${HE(t.w)}</button>`).join("") : `<span class="ph">Ta phrase apparaîtra ici.</span>`;
+      app.querySelector("#tiles").innerHTML = solved ? "" : tiles.filter(t => !picked.includes(t)).map(t => `<button class="tile" data-i="${t.i}">${HE(t.w)}</button>`).join("");
+      if(solved) return;
+      app.querySelectorAll("#tiles .tile").forEach(b => b.onclick = () => slide(() => { picked.push(tiles.find(t => t.i === +b.dataset.i)); render() }));
+      app.querySelectorAll("#built .tile").forEach(b => b.onclick = () => slide(() => { picked = picked.filter(t => t.i !== +b.dataset.i); render() }));
+    };
+    render();
+    app.querySelector("#clear").onclick = () => slide(() => { picked = []; render() });
+    app.querySelector("#check").onclick = () => {
+      if(!picked.length) return;
+      tries++;
+      const strip = w => sp(w)[0].replace(/[.,!?]/g, "");
+      const ok = picked.map(t => strip(t.w)).join(" ") === words.map(strip).join(" ");
+      if(ok || tries >= 3){
+        solved = true;
+        picked = words.map(w => ({w, i:-1})); render();
+        app.querySelector("#act").hidden = true;
+        fb(ok, (ok ? "Exact ! " : "La bonne phrase était : ") + E(st.he));
+        say(t);
+        showGo(ok && tries === 1 ? 1 : 0);
+      } else fb(false, tries === 1 ? "Pas encore. Relis la phrase en français et réessaie." : "Presque ! Dernier essai.");
+    };
+
+  } else if(st.t === "dialog"){
+    let k = 0, mistakes = 0;
+    const them = MALE.has(st.who) ? "m" : "f", me = "m";
+    app.innerHTML = head + `<div class="card"><span class="eyebrow">Conversation avec ${esc(st.who)}</span><h2>${esc(st.h)}</h2>
+      <p class="hint">Écoute ${esc(st.who)}, puis choisis ta réponse. Touche une bulle pour la réécouter.</p>
+      <div class="chat" id="chat"></div>
+      <div class="choices" id="opts"></div>
+      <p class="fb" id="fb" hidden></p></div>
+      <button class="btn" id="go" hidden>Continuer</button>`;
+    const chat = app.querySelector("#chat"), opts = app.querySelector("#opts");
+    const bubble = (who, text, fr) => {
+      const d = document.createElement("div");
+      d.className = "msg " + (who === "me" ? "me" : "them");
+      d.innerHTML = `<span class="who">${who === "me" ? "Toi" : esc(st.who)}</span><button class="line" data-say="${esc(sp(text)[1])}" data-voice="${who === "me" ? me : them}">${HE(text)}</button>`
+        + (fr ? `<button class="trb">Voir en français</button><span class="tr" hidden>${esc(fr)}</span>` : "");
+      if(fr) d.querySelector(".trb").onclick = () => { d.querySelector(".tr").hidden = false; d.querySelector(".trb").hidden = true };
+      chat.appendChild(d);
+    };
+    const turn = (queue) => {
+      const L = st.lines[k];
+      bubble("them", L.say, L.fr);
+      say(sp(L.say)[1], {queue, voice:them});
+      app.querySelector("#fb").hidden = true;
+      opts.innerHTML = shuffle(L.c.map((c,i) => ({c,i}))).map(o => `<button class="choice" data-i="${o.i}">${HE(o.c)}</button>`).join("");
+      let wrong = false;
+      opts.querySelectorAll(".choice").forEach(b => b.onclick = () => {
+        if(+b.dataset.i === 0){
+          opts.innerHTML = "";
+          bubble("me", L.c[0]);
+          say(sp(L.c[0])[1], {voice:me});
+          k++;
+          if(k < st.lines.length){
+            const t = document.createElement("p"); t.className = "typing"; t.textContent = st.who + " écrit…"; chat.appendChild(t);
+            setTimeout(() => { t.remove(); turn(true) }, 900);
+          } else {
+            fb(mistakes === 0, mistakes === 0 ? "Conversation parfaite, bravo !" : "Conversation terminée ! Refais-la plus tard pour la réussir sans erreur.");
+            showGo(mistakes === 0 ? 1 : 0);
+          }
+        } else {
+          if(!wrong){ mistakes++; wrong = true }
+          b.classList.add("ko"); b.disabled = true;
+          fb(false, L.why ? esc(L.why) : `Ce n'est pas la bonne réponse. ${esc(st.who)} a dit : « ${esc(L.fr)} »`);
+        }
+      });
+    };
+    turn(false);
+  }
+  app.querySelector("#back").onclick = () => { player.pause(); queueList = []; home() };
+  bindSpeed();
+  window.scrollTo(0,0);
+}
+
+// ---- Feu d'artifice quand une leçon est réussie sans faute (canvas par-dessus la page, ne bloque pas les doigts) ----
+function fireworks(bursts){
+  if(matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  const c = document.createElement("canvas"), ctx = c.getContext("2d"), dpr = window.devicePixelRatio || 1;
+  c.style.cssText = "position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:50";
+  const W = innerWidth, H = innerHeight; c.width = W*dpr; c.height = H*dpr; ctx.scale(dpr, dpr);
+  document.body.appendChild(c);
+  const COLORS = ["#4f8dff","#7cc4ff","#ffb020","#4fd1d3","#ffffff","#2f6bff"];
+  const parts = [];
+  const burst = () => {
+    const x = W*(.15 + Math.random()*.7), y = H*(.12 + Math.random()*.35), col = COLORS[Math.floor(Math.random()*COLORS.length)];
+    for(let i=0;i<70;i++){
+      const a = Math.random()*Math.PI*2, v = 1.5 + Math.random()*4.5;
+      parts.push({x, y, vx:Math.cos(a)*v, vy:Math.sin(a)*v, life:1, col: Math.random()<.2 ? "#ffd447" : col});
+    }
+  };
+  for(let i=0;i<bursts;i++) setTimeout(burst, i*420);
+  const end = performance.now() + bursts*420 + 1800;
+  (function frame(t){
+    ctx.clearRect(0,0,W,H);
+    for(const q of parts){
+      q.x += q.vx; q.y += q.vy; q.vx *= .975; q.vy = q.vy*.975 + .06; q.life -= .012;
+      if(q.life <= 0) continue;
+      ctx.globalAlpha = q.life; ctx.fillStyle = q.col;
+      ctx.beginPath(); ctx.arc(q.x, q.y, 2.4, 0, Math.PI*2); ctx.fill();
+    }
+    if(t < end) requestAnimationFrame(frame); else c.remove();
+  })(performance.now());
+}
+
+function finish(mi, score){
+  const m = MODULES[mi], max = m.steps.filter(scored).length;
+  // On gagne 10 points par bonne réponse du premier coup. En refaisant une leçon, on gagne seulement ce qu'on améliore.
+  const best = S.done[m.id] ?? 0, first = S.done[m.id] === undefined;
+  const earned = Math.max(0, score - best) * 10, lvBefore = levelOf(S.xp);
+  S.done[m.id] = Math.max(best, score); S.pts += earned; S.xp += earned; store.set(S);
+  const lvAfter = levelOf(S.xp);
+  const nextM = MODULES[mi+1], all = MODULES.every(x => S.done[x.id] !== undefined);
+  app.innerHTML = `<div class="card" style="margin-top:24px"><span class="eyebrow">Leçon terminée</span>
+    <h2>${m.em} ${m.title} : ${score}/${max} du premier coup</h2>
+    <p> ${score === max ? "Sans faute, " + E("כׇּל הַכָּבוֹד!|kol hakavód!") : "Tu peux refaire la leçon quand tu veux pour t'entraîner."}${earned ? ` Tu gagnes ${earned} points.` : first ? "" : " Fais mieux que ton record pour gagner des points."}</p>
+    ${lvAfter > lvBefore ? `<p class="lvup">${LEVELS[lvAfter].em} Niveau supérieur ! Tu es maintenant <b>${LEVELS[lvAfter].name}</b>.</p>` : ""}
+    ${!nextM && all ? `<p>Tu as fini tout le parcours ! Tu sais lire les lettres, te présenter, commander, demander ton chemin et proposer une sortie. ${E("מַזָּל טוֹב!|mazál tov!")}</p>` : ""}</div>
+    ${levelCard()}
+    ${nextM ? `<button class="btn" id="nextm">Leçon suivante : ${nextM.title}</button>` : ""}
+    <button class="btn ghost" id="home">Retour au parcours</button>
+    <button class="btn ghost" id="again">Refaire cette leçon</button>`;
+  if(score === max) fireworks(!nextM && all ? 9 : 6);
+  if(nextM) app.querySelector("#nextm").onclick = () => lesson(mi+1, 0, 0);
+  app.querySelector("#home").onclick = home;
+  app.querySelector("#again").onclick = () => lesson(mi, 0, 0);
+  window.scrollTo(0,0);
+}
+home();
+if("serviceWorker" in navigator){ navigator.serviceWorker.register("sw.js").catch(()=>{}); }
+</script>
+</body>
+</html>
