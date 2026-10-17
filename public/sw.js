@@ -1,5 +1,5 @@
 // Garde l'app disponible hors connexion. Change VERSION à chaque mise à jour.
-const VERSION = "shalom-v1";
+const VERSION = "shalom-v2";
 const FILES = ["./", "index.html", "lessons.js", "audio/map.js", "manifest.webmanifest", "icons/apple-touch-icon.png", "icons/icon-192.png", "icons/icon-512.png"];
 
 self.addEventListener("install", e => {
